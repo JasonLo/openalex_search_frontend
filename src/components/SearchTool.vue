@@ -1,5 +1,5 @@
 <template>
-    <div class="container mx-auto px-4">
+    <div class="container max-w-4xl mx-auto px-4">
         <Intro />
         <SearchInput 
             v-model:modelValueQuery="query" 
@@ -27,36 +27,37 @@
             </div>
         </div>
 
-        <div v-else-if="searchInitiated && results.length === 0" class="my-4">
-            <p>No results found.</p>
-        </div>
-
+        
         <div v-if="errorMessage" class="my-4 text-red-500">
             <p>{{ errorMessage }}</p>
+        </div>
+        
+        <div v-else-if="hasSearched && results.length === 0 && !loading">
+            No results found.
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import Intro from './Intro.vue';
 import SearchInput from './SearchInput.vue';
 import ResultCard from './ResultCard.vue';
-import Intro from './Intro.vue';
 
 export default defineComponent({
     name: 'SearchTool',
     components: {
+        Intro,
         SearchInput,
         ResultCard,
-        Intro,
     },
     setup() {
-        const query = ref('higgs boson');
+        const query = ref('Higgs boson');
         const topK = ref<number>(3);
         const results = ref<any[]>([]);
         const loading = ref(false);
         const errorMessage = ref('');
-        const searchInitiated = ref(false);
+        const hasSearched = ref(false);
 
         const search = async () => {
             if (!query.value.trim()) {
@@ -66,8 +67,8 @@ export default defineComponent({
 
             errorMessage.value = '';
             results.value = []; // Clear previous results
-            searchInitiated.value = true;
             loading.value = true;
+            hasSearched.value = true;
 
             try {
                 const response = await fetch(buildSearchUrl(query.value, topK.value));
@@ -95,7 +96,7 @@ export default defineComponent({
             results,
             loading,
             errorMessage,
-            searchInitiated,
+            hasSearched,
             search,
         };
     },
